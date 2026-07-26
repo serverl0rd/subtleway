@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node (only if tooling is added later)
+node_modules/
+npm-debug.log*
+
+# Python (icon tooling)
+__pycache__/
+*.pyc
+.venv/
+
+# Build / packaging output
+*.zip
+dist/

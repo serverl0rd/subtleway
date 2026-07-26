@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subtleway</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand" aria-label="Subtleway">
+        <span class="brand-sub">Sub</span><span class="brand-tle">tle</span><span class="brand-way">way</span>
+      </div>
+      <label class="master-toggle" title="Enable Subtleway">
+        <input type="checkbox" id="enabled" />
+        <span class="switch"></span>
+      </label>
+    </header>
+
+    <p class="tagline">Ride your subtitles your way.</p>
+
+    <!-- Live status -->
+    <div class="status" id="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Checking active tab…</span>
+    </div>
+
+    <!-- Live preview -->
+    <div class="preview" id="previewStage">
+      <div class="preview-label">LIVE PREVIEW</div>
+      <div class="preview-caption"><span id="previewText">This is how your subtitles will look.</span></div>
+    </div>
+
+    <!-- Language / track -->
+    <section class="card" id="languageCard">
+      <div class="card-head">
+        <h2>Language</h2>
+        <span class="card-note" id="langNote"></span>
+      </div>
+      <select id="trackSelect" class="control-select" disabled>
+        <option>—</option>
+      </select>
+    </section>
+
+    <!-- Presets -->
+    <section class="card">
+      <div class="card-head"><h2>Presets</h2></div>
+      <div class="presets" id="presets"></div>
+    </section>
+
+    <!-- Text -->
+    <section class="card">
+      <div class="card-head"><h2>Text</h2></div>
+
+      <div class="row">
+        <label for="color">Colour</label>
+        <div class="color-wrap"><input type="color" id="color" /></div>
+      </div>
+
+      <div class="row">
+        <label for="fontFamily">Font</label>
+        <select id="fontFamily" class="control-select"></select>
+      </div>
+
+      <div class="row slider">
+        <label for="fontSizePx">Size <b id="fontSizePxVal"></b></label>
+        <input type="range" id="fontSizePx" min="12" max="72" step="1" />
+      </div>
+
+      <div class="row slider">
+        <label for="opacity">Opacity <b id="opacityVal"></b></label>
+        <input type="range" id="opacity" min="10" max="100" step="1" />
+      </div>
+
+      <div class="row slider">
+        <label for="letterSpacing">Letter spacing <b id="letterSpacingVal"></b></label>
+        <input type="range" id="letterSpacing" min="-2" max="8" step="0.5" />
+      </div>
+
+      <div class="row slider">
+        <label for="lineHeight">Line height <b id="lineHeightVal"></b></label>
+        <input type="range" id="lineHeight" min="1" max="2.2" step="0.05" />
+      </div>
+
+      <div class="chips">
+        <button class="chip" id="bold" data-flag="bold"><b>B</b></button>
+        <button class="chip" id="italic" data-flag="italic"><i>I</i></button>
+        <button class="chip" id="uppercase" data-flag="uppercase">AA</button>
+      </div>
+    </section>
+
+    <!-- Background -->
+    <section class="card">
+      <div class="card-head"><h2>Background box</h2></div>
+      <div class="row">
+        <label for="boxColor">Box colour</label>
+        <div class="color-wrap"><input type="color" id="boxColor" /></div>
+      </div>
+      <div class="row slider">
+        <label for="boxOpacity">Box opacity <b id="boxOpacityVal"></b></label>
+        <input type="range" id="boxOpacity" min="0" max="100" step="1" />
+      </div>
+      <div class="row slider">
+        <label for="boxPaddingX">Padding <b id="boxPaddingXVal"></b></label>
+        <input type="range" id="boxPaddingX" min="0" max="40" step="1" />
+      </div>
+    </section>
+
+    <!-- Edge -->
+    <section class="card">
+      <div class="card-head"><h2>Outline &amp; edge</h2></div>
+      <div class="row">
+        <label for="edgeStyle">Style</label>
+        <select id="edgeStyle" class="control-select">
+          <option value="none">None</option>
+          <option value="dropshadow">Drop shadow</option>
+          <option value="outline">Outline</option>
+          <option value="raised">Raised</option>
+          <option value="depressed">Depressed</option>
+          <option value="glow">Glow</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="edgeColor">Edge colour</label>
+        <div class="color-wrap"><input type="color" id="edgeColor" /></div>
+      </div>
+    </section>
+
+    <!-- Position -->
+    <section class="card">
+      <div class="card-head"><h2>Position</h2></div>
+      <div class="row slider">
+        <label for="offsetY">Vertical <b id="offsetYVal"></b></label>
+        <input type="range" id="offsetY" min="-300" max="300" step="2" />
+      </div>
+      <div class="row slider">
+        <label for="offsetX">Horizontal <b id="offsetXVal"></b></label>
+        <input type="range" id="offsetX" min="-400" max="400" step="2" />
+      </div>
+      <div class="row">
+        <label for="align">Align</label>
+        <select id="align" class="control-select">
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" id="dragBtn">⤢ Drag on screen</button>
+        <button class="btn ghost" id="resetPos">Reset position</button>
+      </div>
+    </section>
+
+    <button class="btn danger-ghost" id="resetAll">Reset everything</button>
+
+    <!-- Disclaimer / footer -->
+    <footer class="footer">
+      <p class="disclaimer">
+        <strong>Subtleway works with your own legitimate subscription only.</strong>
+        It restyles the subtitles the service already shows you. It does not enable,
+        encourage, or support piracy, account sharing, or bypassing any paid service.
+      </p>
+      <p class="credit">A free product by <span class="bc">BuildCraft&nbsp;Labs</span></p>
+    </footer>
+  </div>
+
+  <script src="../common/subtleway-core.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

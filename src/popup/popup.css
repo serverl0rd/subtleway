@@ -1,0 +1,321 @@
+/* Subtleway popup — Netflix-inspired dark UI */
+
+:root {
+  --nf-red: #e50914;
+  --nf-red-hover: #f6121d;
+  --sub-green: #00963b;
+  --sub-gold: #ffc600;
+  --bg: #141414;
+  --bg-elev: #1f1f1f;
+  --bg-card: #232323;
+  --line: #333;
+  --text: #ffffff;
+  --text-dim: #b3b3b3;
+  --text-mute: #808080;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Netflix Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body { width: 380px; }
+
+.app { padding: 16px 16px 20px; }
+
+/* ---- Header / brand ---- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  user-select: none;
+}
+.brand-sub {
+  color: var(--sub-green);
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
+}
+.brand-way {
+  color: var(--sub-gold);
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
+}
+.brand-tle {
+  color: var(--nf-red);
+  font-family: "Arial Narrow", "Bebas Neue", "Roboto Condensed", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: lowercase;
+  margin: 0 -1px;
+}
+
+.tagline {
+  margin: 4px 0 12px;
+  color: var(--text-mute);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+/* ---- Master toggle ---- */
+.master-toggle { position: relative; display: inline-block; cursor: pointer; }
+.master-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch {
+  display: block;
+  width: 46px;
+  height: 26px;
+  border-radius: 26px;
+  background: #4d4d4d;
+  transition: background 0.2s;
+  position: relative;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.master-toggle input:checked + .switch { background: var(--nf-red); }
+.master-toggle input:checked + .switch::after { transform: translateX(20px); }
+
+/* ---- Status ---- */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin-bottom: 12px;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-mute); flex: 0 0 auto;
+}
+.dot.on { background: #46d369; box-shadow: 0 0 8px #46d369; }
+.dot.off { background: var(--nf-red); }
+
+/* ---- Live preview ---- */
+.preview {
+  position: relative;
+  background:
+    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.75)),
+    repeating-linear-gradient(45deg, #2a2a2a 0 12px, #262626 12px 24px);
+  border-radius: var(--radius);
+  min-height: 96px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 14px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.preview-label {
+  position: absolute;
+  top: 8px; left: 10px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-mute);
+  font-weight: 700;
+}
+.preview-caption { text-align: center; }
+.preview-caption span { display: inline; }
+
+/* ---- Cards ---- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.card-head h2 {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.card-note { font-size: 11px; color: var(--text-mute); }
+
+/* ---- Rows / controls ---- */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.row:last-child { margin-bottom: 0; }
+.row label {
+  font-size: 13px;
+  color: var(--text);
+  flex: 0 0 auto;
+}
+.row.slider { flex-direction: column; align-items: stretch; gap: 6px; }
+.row.slider label {
+  display: flex; justify-content: space-between;
+  color: var(--text-dim); font-size: 12px;
+}
+.row.slider label b { color: #fff; font-weight: 600; }
+
+.control-select {
+  flex: 1 1 auto;
+  max-width: 62%;
+  background: var(--bg-elev);
+  color: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 13px;
+}
+#trackSelect { max-width: 100%; }
+
+/* Colour inputs */
+.color-wrap {
+  width: 44px; height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+input[type="color"] {
+  width: 150%; height: 150%;
+  margin: -8px 0 0 -8px;
+  background: none; border: none; padding: 0; cursor: pointer;
+}
+
+/* Range sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: #4d4d4d;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--nf-red);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(229,9,20,0.25);
+}
+
+/* Chips (bold/italic/uppercase) */
+.chips { display: flex; gap: 8px; }
+.chip {
+  flex: 1;
+  background: var(--bg-elev);
+  color: var(--text-dim);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 0;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip:hover { border-color: #555; }
+.chip.active {
+  background: var(--nf-red);
+  color: #fff;
+  border-color: var(--nf-red);
+}
+
+/* Presets */
+.presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.preset {
+  flex: 1 1 calc(33% - 8px);
+  min-width: 88px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 6px;
+  cursor: pointer;
+  background: #000;
+  text-align: center;
+  font-size: 12px;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.preset:hover { transform: translateY(-2px); border-color: var(--nf-red); }
+.preset span { display: inline-block; }
+
+/* Buttons */
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-row { display: flex; gap: 8px; margin-top: 4px; }
+.btn.ghost {
+  flex: 1;
+  background: var(--bg-elev);
+  color: #fff;
+  border: 1px solid var(--line);
+}
+.btn.ghost:hover { border-color: #666; }
+.btn.ghost.active { background: var(--nf-red); border-color: var(--nf-red); }
+.btn.danger-ghost {
+  width: 100%;
+  background: transparent;
+  color: var(--text-mute);
+  border: 1px solid var(--line);
+}
+.btn.danger-ghost:hover { color: var(--nf-red); border-color: var(--nf-red); }
+
+/* Footer */
+.footer { margin-top: 16px; }
+.disclaimer {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-mute);
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin: 0 0 8px;
+}
+.disclaimer strong { color: var(--text-dim); }
+.credit {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-mute);
+  margin: 0;
+}
+.credit .bc { color: var(--nf-red); font-weight: 700; letter-spacing: 0.3px; }
+
+/* Disabled state dims everything except the master toggle + status */
+.app.disabled .preview,
+.app.disabled .card,
+.app.disabled .btn.danger-ghost {
+  opacity: 0.4;
+  pointer-events: none;
+}
