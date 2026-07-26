@@ -130,8 +130,15 @@
       return vids.sort((a, b) => (b.clientWidth * b.clientHeight) - (a.clientWidth * a.clientHeight))[0] || null;
     }
     function isPlaying() { const v = videoEl(); return v && !v.paused && !v.ended && v.readyState > 2; }
+    // Only surface over the real player, not small browse-page preview videos.
+    function bigVideo() {
+      const v = videoEl();
+      if (!v) return null;
+      const r = v.getBoundingClientRect();
+      return (r.width * r.height) > (window.innerWidth * window.innerHeight * 0.35) ? v : null;
+    }
     function show() {
-      if (!videoEl()) return;
+      if (!bigVideo()) return;
       root.classList.add('sw-visible');
       clearTimeout(hideTimer);
       if (!panelOpen && isPlaying()) hideTimer = setTimeout(hide, 3500);
