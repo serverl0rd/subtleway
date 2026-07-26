@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Subtleway</title>
+  <style>
+    :root { --nf-red:#e50914; --sub-green:#00963b; --sub-gold:#ffc600; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background: radial-gradient(1200px 600px at 50% -10%, #2a0a0d 0%, #141414 55%, #0b0b0b 100%);
+      color: #fff;
+      font-family: "Netflix Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+      display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+    }
+    .wrap { max-width: 640px; width: 100%; text-align: center; }
+    .brand { font-size: 64px; font-weight: 800; letter-spacing: -1px; line-height: 1; margin-bottom: 8px; }
+    .brand .sub, .brand .way {
+      font-family: "Trebuchet MS","Segoe UI",system-ui,sans-serif; font-weight: 800;
+    }
+    .brand .sub { color: var(--sub-green); }
+    .brand .way { color: var(--sub-gold); }
+    .brand .tle {
+      color: var(--nf-red);
+      font-family: "Arial Narrow","Bebas Neue","Roboto Condensed",sans-serif;
+      text-transform: lowercase; letter-spacing: 1px;
+    }
+    .tagline { color: #b3b3b3; font-size: 18px; margin: 0 0 36px; }
+    .steps { text-align: left; display: grid; gap: 16px; margin: 0 auto 36px; max-width: 520px; }
+    .step {
+      background: #1c1c1c; border: 1px solid #333; border-radius: 10px;
+      padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start;
+    }
+    .step .n {
+      flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+      background: var(--nf-red); color: #fff; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step h3 { margin: 2px 0 4px; font-size: 16px; }
+    .step p { margin: 0; color: #b3b3b3; font-size: 14px; line-height: 1.5; }
+    .pin {
+      display: inline-block; background: var(--nf-red); color: #fff; text-decoration: none;
+      font-weight: 700; padding: 12px 26px; border-radius: 6px; font-size: 15px;
+    }
+    .disclaimer {
+      margin: 36px auto 0; max-width: 520px; font-size: 12px; color: #808080;
+      line-height: 1.6; border-top: 1px solid #333; padding-top: 20px;
+    }
+    .disclaimer strong { color: #b3b3b3; }
+    .credit { margin-top: 14px; color: #808080; font-size: 13px; }
+    .credit b { color: var(--nf-red); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand"><span class="sub">Sub</span><span class="tle">tle</span><span class="way">way</span></div>
+    <p class="tagline">Take the wheel on your subtitles.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <div><h3>Open a title</h3><p>Start watching anything on Netflix or Prime Video and turn subtitles on in the player as usual.</p></div>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <div><h3>Click the Subtleway icon</h3><p>Pin it to your toolbar, then open the popup to tweak colour, font, size, outline and more.</p></div>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <div><h3>Watch it change live</h3><p>Every adjustment updates on screen instantly — or hit “Drag on screen” to place subtitles exactly where you want.</p></div>
+      </div>
+    </div>
+
+    <a class="pin" href="https://www.netflix.com" target="_blank" rel="noopener">Open Netflix</a>
+
+    <p class="disclaimer">
+      <strong>Subtleway works with your own legitimate subscription only.</strong>
+      It simply restyles the subtitles the service already displays to you. It does
+      not enable, encourage, or support piracy, account sharing, or bypassing any
+      paid service in any way.
+    </p>
+    <p class="credit">A free product by <b>BuildCraft Labs</b></p>
+  </div>
+</body>
+</html>
