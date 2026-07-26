@@ -16,6 +16,7 @@
     if (!API || !API.adapter) return;
 
     const ICON_URL = chrome.runtime.getURL('assets/icons/icon-48.png');
+    const WORDMARK_URL = chrome.runtime.getURL('assets/logo/wordmark.png');
     const PRESETS = SUBTLEWAY.PRESETS;
     let panelOpen = false;
     let hideTimer = null;
@@ -41,10 +42,7 @@
       #sw-panel.sw-open { display: block; }
       .sw-head { display: flex; align-items: center; justify-content: space-between;
         padding: 12px 14px; border-bottom: 1px solid #2a2a2a; }
-      .sw-brand { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
-      .sw-brand .g { color: #00963b; font-family:"Trebuchet MS",system-ui,sans-serif; }
-      .sw-brand .r { color: #e50914; font-family:"Arial Narrow",sans-serif; text-transform: lowercase; }
-      .sw-brand .y { color: #ffc600; font-family:"Trebuchet MS",system-ui,sans-serif; }
+      .sw-brand-logo { height: 22px; width: auto; display: block; }
       .sw-x { background: none; border: none; color: #999; font-size: 20px; cursor: pointer; line-height: 1; }
       .sw-x:hover { color: #fff; }
       .sw-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 14px; }
@@ -85,7 +83,7 @@
     root.innerHTML = `
       <div id="sw-panel" role="dialog" aria-label="Subtleway controls">
         <div class="sw-head">
-          <span class="sw-brand"><span class="g">Sub</span><span class="r">tle</span><span class="y">way</span></span>
+          <img class="sw-brand-logo" src="${WORDMARK_URL}" alt="Subtleway" />
           <button class="sw-x" id="sw-close" aria-label="Close">×</button>
         </div>
         <div class="sw-body">

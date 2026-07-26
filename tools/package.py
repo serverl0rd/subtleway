@@ -12,15 +12,19 @@ OUT = os.path.join(ROOT, "subtleway.zip")
 
 # Files/dirs to include (relative to repo root).
 INCLUDE_FILES = ["manifest.json", "LICENSE"]
-INCLUDE_DIRS = ["src", "assets/icons"]
+INCLUDE_DIRS = ["src", "assets/icons", "assets/logo"]
 # Only ship the icon sizes the manifest references.
 ICON_KEEP = {"icon-16.png", "icon-32.png", "icon-48.png", "icon-128.png"}
 
 
 def should_add(path):
     base = os.path.basename(path)
-    if path.replace(os.sep, "/").startswith("assets/icons/"):
+    p = path.replace(os.sep, "/")
+    if p.startswith("assets/icons/"):
         return base in ICON_KEEP
+    if p.startswith("assets/logo/"):
+        # Ship only the runtime wordmark, not the large design source.
+        return p == "assets/logo/wordmark.png"
     return True
 
 

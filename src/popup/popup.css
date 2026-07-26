@@ -37,6 +37,13 @@ body { width: 380px; }
   justify-content: space-between;
 }
 
+.brand-logo {
+  height: 26px;
+  width: auto;
+  display: block;
+  user-select: none;
+}
+
 .brand {
   font-weight: 800;
   font-size: 30px;
