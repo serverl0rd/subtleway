@@ -11,7 +11,7 @@ Upload package: **`subtleway.zip`** (built by `python3 tools/package.py`).
 > Subtleway — Subtitle Control for Netflix & Prime
 
 **Summary** (max 132 chars)
-> Live control over subtitles on Netflix & Prime Video — colour, font, size, outline, position and language. Free by BuildCraft Labs.
+> Live subtitle control for Netflix & Prime Video: colour, font, size, outline, position & language. Free by BuildCraft Labs.
 
 **Category:** Entertainment  (alternative: Accessibility)
 **Language:** English
