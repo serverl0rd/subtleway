@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1280px; height: 800px; overflow: hidden; }
+    body {
+      font-family: "Netflix Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #fff;
+      position: relative;
+    }
+    /* Cinematic backdrop */
+    .scene {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(1000px 500px at 30% 20%, rgba(229,9,20,0.28), transparent 60%),
+        radial-gradient(900px 600px at 85% 90%, rgba(0,150,59,0.22), transparent 60%),
+        linear-gradient(160deg, #1a1a1a 0%, #0c0c0c 60%, #000 100%);
+    }
+    .scene::after { /* subtle film grain / scanlines */
+      content: ""; position: absolute; inset: 0; opacity: 0.06;
+      background: repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
+    }
+    .vignette { position: absolute; inset: 0; box-shadow: inset 0 0 240px 60px rgba(0,0,0,0.8); }
+
+    .headline {
+      position: absolute; left: 72px; top: 128px; max-width: 560px; z-index: 3;
+    }
+    .brand {
+      font-size: 40px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 22px;
+    }
+    .brand .sub, .brand .way { font-family: "Trebuchet MS","Segoe UI",system-ui,sans-serif; font-weight: 800; }
+    .brand .sub { color: #00963b; }
+    .brand .way { color: #ffc600; }
+    .brand .tle { color: #e50914; font-family: "Arial Narrow","Roboto Condensed",sans-serif; text-transform: lowercase; letter-spacing: 1px; }
+    .headline h1 { font-size: 58px; line-height: 1.05; font-weight: 800; letter-spacing: -1px; }
+    .headline h1 .accent { color: #e50914; }
+    .headline p { margin-top: 18px; font-size: 22px; color: #c9c9c9; line-height: 1.4; }
+
+    /* Sample caption sitting in the "scene" like real subtitles */
+    .caption-stage {
+      position: absolute; left: 72px; right: 470px; bottom: 90px; text-align: center; z-index: 3;
+    }
+    .caption { display: inline; }
+
+    /* Floating popup panel */
+    .panel-wrap {
+      position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
+      width: 316px; height: 700px; overflow: hidden;
+      border-radius: 14px; z-index: 4;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    .panel-wrap iframe {
+      width: 380px; height: 1543px; border: 0;
+      transform: scale(0.832); transform-origin: top left;
+    }
+    .badge {
+      position: absolute; left: 72px; top: 62px; z-index: 5;
+      background: #e50914; color: #fff; font-weight: 700; font-size: 13px;
+      padding: 7px 14px; border-radius: 999px; letter-spacing: 0.5px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene"></div>
+  <div class="vignette"></div>
+
+  <div class="headline">
+    <div class="brand"><span class="sub">Sub</span><span class="tle">tle</span><span class="way">way</span></div>
+    <h1 id="hl">Your subtitles, <span class="accent">your way.</span></h1>
+    <p id="sub">Colour, font, size, outline and position — changed live on Netflix &amp; Prime Video.</p>
+  </div>
+
+  <div class="badge">FREE · BuildCraft Labs</div>
+
+  <div class="caption-stage">
+    <span class="caption" id="caption">This is exactly how your subtitles will look.</span>
+  </div>
+
+  <div class="panel-wrap">
+    <iframe src="../src/popup/popup.html"></iframe>
+  </div>
+</body>
+</html>
