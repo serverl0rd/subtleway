@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Subtleway — Subtitle Control for Netflix & Prime Video",
   "short_name": "Subtleway",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Live subtitle control for Netflix & Prime Video: colour, font, size, outline, position & language. Free by BuildCraft Labs.",
   "author": "BuildCraft Labs",
   "icons": {
