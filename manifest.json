@@ -60,7 +60,8 @@
       "js": [
         "src/common/subtleway-core.js",
         "src/content/adapters.js",
-        "src/content/content.js"
+        "src/content/content.js",
+        "src/content/overlay.js"
       ],
       "run_at": "document_idle",
       "all_frames": true
@@ -71,6 +72,26 @@
       "run_at": "document_start",
       "world": "MAIN",
       "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/icons/*.png"],
+      "matches": [
+        "*://*.netflix.com/*",
+        "*://*.primevideo.com/*",
+        "*://*.amazon.com/*",
+        "*://*.amazon.co.uk/*",
+        "*://*.amazon.de/*",
+        "*://*.amazon.in/*",
+        "*://*.amazon.co.jp/*",
+        "*://*.amazon.fr/*",
+        "*://*.amazon.es/*",
+        "*://*.amazon.it/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.com.au/*",
+        "*://*.amazon.com.br/*"
+      ]
     }
   ]
 }

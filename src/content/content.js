@@ -2,8 +2,12 @@
  * Subtleway — content script (isolated world)
  * -------------------------------------------
  * Injects a live stylesheet that restyles the streaming site's own subtitles,
- * keeps it in sync with saved settings, handles drag-to-reposition, and relays
- * language/track requests to the page-context bridge.
+ * keeps it in sync with saved settings, handles drag-to-reposition (with an
+ * on-screen Save/Done control), and relays language/track requests to the
+ * page-context bridge.
+ *
+ * Exposes a small API on window.__SUBTLEWAY_CONTENT so the on-page overlay
+ * (overlay.js, same isolated world) can drive the same settings + drag logic.
  */
 (function () {
   'use strict';
@@ -16,6 +20,17 @@
   const STORAGE_KEY = 'subtleway:settings';
   let settings = Object.assign({}, SUBTLEWAY.DEFAULT_SETTINGS);
   let dragMode = false;
+
+  // Shared API for overlay.js (and anything else in this isolated world).
+  const API = (window.__SUBTLEWAY_CONTENT = {
+    adapter,
+    getSettings: () => Object.assign({}, settings),
+    saveSettings,
+    isDragMode: () => dragMode,
+    setDragMode: (on) => (on ? enableDragMode() : disableDragMode()),
+    callPageBridge,
+    onChange: [], // listeners notified whenever settings change
+  });
 
   // ---------------------------------------------------------------------------
   // Stylesheet injection
@@ -49,10 +64,15 @@
   // Settings load + live sync
   // ---------------------------------------------------------------------------
 
+  function notifyChange() {
+    API.onChange.forEach((fn) => { try { fn(Object.assign({}, settings)); } catch (_e) {} });
+  }
+
   function loadSettings() {
     chrome.storage.local.get(STORAGE_KEY, (data) => {
       settings = Object.assign({}, SUBTLEWAY.DEFAULT_SETTINGS, data[STORAGE_KEY] || {});
       applyStyles();
+      notifyChange();
     });
   }
 
@@ -61,6 +81,7 @@
       settings = Object.assign({}, SUBTLEWAY.DEFAULT_SETTINGS, changes[STORAGE_KEY].newValue || {});
       applyStyles();
       if (dragMode) refreshDragHandle();
+      notifyChange();
     }
   });
 
@@ -68,14 +89,12 @@
     settings = Object.assign({}, settings, partial);
     chrome.storage.local.set({ [STORAGE_KEY]: settings });
     applyStyles();
+    notifyChange();
   }
 
   // ---------------------------------------------------------------------------
-  // Drag-to-reposition
+  // Drag-to-reposition (with an on-screen Save/Done control)
   // ---------------------------------------------------------------------------
-  //
-  // When drag mode is on we place an invisible catcher over the subtitle
-  // container. Dragging updates offsetX/offsetY live and persists them.
 
   let handle = null;
   let dragging = false;
@@ -83,6 +102,7 @@
   let startY = 0;
   let baseX = 0;
   let baseY = 0;
+  let dragRefreshTimer = null;
 
   function firstContainer() {
     for (const sel of adapter.containerSelectors) {
@@ -92,14 +112,23 @@
     return null;
   }
 
+  function dragParent() {
+    // In fullscreen, fixed elements outside the fullscreen node are invisible,
+    // so mount inside it.
+    return document.fullscreenElement || document.body;
+  }
+
   function refreshDragHandle() {
+    if (!handle) return;
     const target = firstContainer();
-    if (!target || !handle) return;
-    const rect = target.getBoundingClientRect();
+    const rect = target
+      ? target.getBoundingClientRect()
+      : { top: window.innerHeight * 0.6, left: window.innerWidth * 0.2,
+          width: window.innerWidth * 0.6, height: 60 };
     handle.style.top = rect.top + 'px';
     handle.style.left = rect.left + 'px';
-    handle.style.width = rect.width + 'px';
-    handle.style.height = Math.max(rect.height, 48) + 'px';
+    handle.style.width = Math.max(rect.width, 120) + 'px';
+    handle.style.height = Math.max(rect.height, 52) + 'px';
   }
 
   function onPointerMove(e) {
@@ -117,24 +146,54 @@
     document.removeEventListener('pointerup', onPointerUp, true);
   }
 
+  function onKeyDown(e) {
+    if (e.key === 'Escape' && dragMode) {
+      e.preventDefault();
+      disableDragMode();
+    }
+  }
+
   function enableDragMode() {
     if (dragMode) return;
     dragMode = true;
+
     handle = document.createElement('div');
     handle.id = 'subtleway-drag-handle';
     Object.assign(handle.style, {
       position: 'fixed', zIndex: '2147483647', cursor: 'grab',
       border: '2px dashed #e50914', borderRadius: '6px',
       background: 'rgba(229,9,20,0.08)', boxSizing: 'border-box',
+      touchAction: 'none',
     });
-    const hint = document.createElement('div');
-    hint.textContent = '⤢ Drag to position subtitles';
-    Object.assign(hint.style, {
-      position: 'absolute', top: '-26px', left: '50%', transform: 'translateX(-50%)',
-      background: '#e50914', color: '#fff', font: '600 12px/1 "Helvetica Neue",Arial,sans-serif',
-      padding: '5px 10px', borderRadius: '4px', whiteSpace: 'nowrap',
+
+    // Toolbar with instructions + a Save/Done button so the user is never stuck.
+    const bar = document.createElement('div');
+    Object.assign(bar.style, {
+      position: 'absolute', top: '-40px', left: '50%', transform: 'translateX(-50%)',
+      display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap',
+      background: '#141414', border: '1px solid #333', color: '#fff',
+      font: '600 12px/1 "Helvetica Neue",Arial,sans-serif',
+      padding: '7px 8px 7px 12px', borderRadius: '8px',
+      boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
     });
-    handle.appendChild(hint);
+    const label = document.createElement('span');
+    label.textContent = '⤢ Drag the subtitles — then Save';
+    label.style.opacity = '0.85';
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = '✓ Save';
+    Object.assign(saveBtn.style, {
+      background: '#e50914', color: '#fff', border: 'none', borderRadius: '5px',
+      padding: '6px 12px', font: '700 12px/1 "Helvetica Neue",Arial,sans-serif',
+      cursor: 'pointer',
+    });
+    const stop = (e) => { e.stopPropagation(); };
+    saveBtn.addEventListener('pointerdown', stop);
+    saveBtn.addEventListener('click', (e) => { stop(e); disableDragMode(); });
+    bar.addEventListener('pointerdown', stop); // clicks on the bar never start a drag
+    bar.appendChild(label);
+    bar.appendChild(saveBtn);
+    handle.appendChild(bar);
+
     handle.addEventListener('pointerdown', (e) => {
       dragging = true;
       startX = e.clientX;
@@ -146,22 +205,32 @@
       document.addEventListener('pointerup', onPointerUp, true);
       e.preventDefault();
     });
-    document.body.appendChild(handle);
+
+    dragParent().appendChild(handle);
     refreshDragHandle();
     window.addEventListener('resize', refreshDragHandle, true);
     window.addEventListener('scroll', refreshDragHandle, true);
-    // Follow the container as playback re-renders captions.
+    document.addEventListener('keydown', onKeyDown, true);
+    document.addEventListener('fullscreenchange', reparentHandle, true);
     dragRefreshTimer = setInterval(refreshDragHandle, 400);
   }
 
-  let dragRefreshTimer = null;
+  function reparentHandle() {
+    if (handle) { dragParent().appendChild(handle); refreshDragHandle(); }
+  }
+
   function disableDragMode() {
+    if (!dragMode) return;
     dragMode = false;
     if (dragRefreshTimer) clearInterval(dragRefreshTimer);
+    dragRefreshTimer = null;
     if (handle && handle.parentNode) handle.parentNode.removeChild(handle);
     handle = null;
     window.removeEventListener('resize', refreshDragHandle, true);
     window.removeEventListener('scroll', refreshDragHandle, true);
+    document.removeEventListener('keydown', onKeyDown, true);
+    document.removeEventListener('fullscreenchange', reparentHandle, true);
+    notifyChange();
   }
 
   // ---------------------------------------------------------------------------
@@ -191,7 +260,6 @@
       const reqId = ++trackReqId;
       pendingTrackRequests.set(reqId, resolve);
       window.postMessage({ source: 'subtleway', action, reqId, data }, '*');
-      // Fail open if the page bridge never answers.
       setTimeout(() => {
         if (pendingTrackRequests.has(reqId)) {
           pendingTrackRequests.delete(reqId);
@@ -225,8 +293,7 @@
         return true;
 
       case 'subtleway:setDragMode':
-        if (msg.on) enableDragMode();
-        else disableDragMode();
+        API.setDragMode(!!msg.on);
         sendResponse({ ok: true, dragMode });
         return false;
 
@@ -239,4 +306,6 @@
   // Boot
   // ---------------------------------------------------------------------------
   loadSettings();
+  API.ready = true;
+  document.dispatchEvent(new CustomEvent('subtleway:ready'));
 })();

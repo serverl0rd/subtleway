@@ -12,7 +12,11 @@ Initial release.
   uppercase, letter spacing, line height.
 - Background box: colour, opacity, padding.
 - Edge & outline styles: none, drop shadow, outline, raised, depressed, glow.
-- Positioning: vertical / horizontal sliders and **drag-to-place on screen**.
+- Positioning: vertical / horizontal sliders and **drag-to-place on screen**, with
+  an on-screen **Save / Done** control (and `Esc`) so the drag guide is never stuck.
+- **On-screen floating control** that appears with the player and auto-hides while
+  playing (mirrors Netflix/Prime controls), opening a compact in-page panel for
+  presets, colour, size, position and language.
 - Language / subtitle-track switching on Netflix via the player's own API
   (uses only the tracks your subscription provides).
 - Five one-tap presets: Netflix, Cinema, High-contrast, Neon, Clean.

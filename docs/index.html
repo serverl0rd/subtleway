@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Subtleway — Subtitle control for Netflix &amp; Prime Video</title>
+<meta name="description" content="Subtleway is a free Chrome extension for live subtitle control on Netflix and Prime Video: colour, font, size, outline, position, on-screen controls and language." />
+<style>
+  :root{
+    --red:#e50914; --red-hi:#f6121d; --green:#00963b; --gold:#ffc600;
+    --bg:#0b0b0b; --bg2:#141414; --card:#1b1b1b; --line:#2a2a2a;
+    --tx:#fff; --dim:#b3b3b3; --mut:#808080; --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--tx);
+    font-family:"Netflix Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  section{padding:88px 0}
+  .eyebrow{color:var(--red);font-weight:800;letter-spacing:2px;font-size:12px;text-transform:uppercase}
+  h2{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-1px;margin:10px 0 14px}
+  .lead{color:var(--dim);font-size:clamp(16px,2vw,19px);max-width:640px}
+
+  /* Brand wordmark */
+  .brand{font-weight:800;letter-spacing:-.5px;line-height:1;user-select:none}
+  .brand .g{color:var(--green);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+  .brand .r{color:var(--red);font-family:"Arial Narrow","Roboto Condensed",sans-serif;text-transform:lowercase;letter-spacing:.5px}
+  .brand .y{color:var(--gold);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+
+  /* Nav */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(11,11,11,.82);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .nav .brand{font-size:26px}
+  .nav-links{display:flex;gap:24px;align-items:center}
+  .nav-links a{color:var(--dim);font-size:14px}
+  .nav-links a:hover{color:#fff}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;
+    font-weight:700;padding:11px 20px;border-radius:6px;font-size:14px;border:none;cursor:pointer;transition:.15s}
+  .btn:hover{background:var(--red-hi);transform:translateY(-1px)}
+  .btn.ghost{background:transparent;border:1px solid #444}
+  .btn.ghost:hover{border-color:#888;background:transparent}
+
+  /* Hero */
+  .hero{position:relative;padding-top:64px;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;z-index:-1;
+    background:
+      radial-gradient(800px 420px at 20% 0%,rgba(229,9,20,.30),transparent 60%),
+      radial-gradient(700px 500px at 100% 30%,rgba(0,150,59,.18),transparent 60%)}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding-top:64px;padding-bottom:40px}
+  .hero h1{font-size:clamp(38px,5.4vw,62px);font-weight:800;letter-spacing:-1.5px;line-height:1.04}
+  .hero h1 .accent{color:var(--red)}
+  .hero p.sub{color:var(--dim);font-size:19px;margin:20px 0 30px;max-width:520px}
+  .cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .cta .note{color:var(--mut);font-size:13px;width:100%}
+  .pill{display:inline-flex;gap:8px;align-items:center;background:#191919;border:1px solid var(--line);
+    color:var(--dim);font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;margin-bottom:22px}
+  .pill b{color:var(--gold)}
+
+  /* Player demo */
+  .player{position:relative;aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;
+    border:1px solid var(--line);background:
+      radial-gradient(500px 300px at 70% 20%,rgba(229,9,20,.25),transparent),
+      linear-gradient(160deg,#242424,#0a0a0a);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .player::after{content:"";position:absolute;inset:0;opacity:.05;
+    background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
+  .scrub{position:absolute;left:5%;right:5%;bottom:22px;height:4px;border-radius:4px;background:rgba(255,255,255,.25)}
+  .scrub::before{content:"";position:absolute;left:0;top:0;bottom:0;width:38%;background:var(--red);border-radius:4px}
+  .demo-cap{position:absolute;left:0;right:0;bottom:52px;text-align:center;padding:0 12px;transition:all .5s ease}
+  .demo-cap span{display:inline;transition:all .5s ease}
+  .demo-float{position:absolute;right:16px;bottom:56px;width:46px;height:46px;border-radius:50%;
+    background:#141414;border:2px solid var(--red);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(0,0,0,.5);animation:floatpulse 3.2s ease-in-out infinite}
+  .demo-float .glyph{display:flex;gap:2px}
+  .demo-float i{width:5px;height:5px;border-radius:1px;display:block}
+  .demo-badge{position:absolute;left:16px;top:14px;font-size:11px;font-weight:700;letter-spacing:1px;
+    color:#fff;background:rgba(0,0,0,.45);padding:5px 10px;border-radius:5px}
+  @keyframes floatpulse{0%,100%{transform:translateY(0);opacity:.9}50%{transform:translateY(-4px);opacity:1}}
+
+  /* Feature grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .feat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;transition:.18s}
+  .feat:hover{border-color:#3a3a3a;transform:translateY(-3px)}
+  .feat .ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-size:20px;margin-bottom:14px;background:#241012;border:1px solid #3a1a1d}
+  .feat h3{font-size:17px;margin-bottom:7px}
+  .feat p{color:var(--dim);font-size:14px}
+  .feat .tag{display:inline-block;margin-top:10px;font-size:10px;font-weight:700;letter-spacing:1px;
+    color:var(--green);border:1px solid #1c4a30;background:#0d1f15;padding:3px 8px;border-radius:999px}
+
+  /* Split deep-dives */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+  .split.rev .txt{order:2}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{background:#191919;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;color:var(--dim)}
+  .chip b{color:#fff}
+  ul.ticks{list-style:none;margin-top:18px;display:flex;flex-direction:column;gap:10px}
+  ul.ticks li{position:relative;padding-left:28px;color:var(--dim)}
+  ul.ticks li::before{content:"✓";position:absolute;left:0;top:0;color:var(--green);font-weight:800}
+  ul.ticks li b{color:#fff}
+
+  /* Mini popup mock */
+  .mock{background:#181818;border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .mock .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .mock .mh .brand{font-size:22px}
+  .swrow{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid #232323;font-size:13px;color:var(--dim)}
+  .swrow:first-of-type{border-top:none}
+  .bar{width:120px;height:5px;border-radius:5px;background:#333;position:relative}
+  .bar::before{content:"";position:absolute;left:0;top:0;bottom:0;width:60%;background:var(--red);border-radius:5px}
+  .dot{width:22px;height:22px;border-radius:50%;background:var(--red)}
+  .presets-mock{display:flex;gap:6px;margin-top:6px}
+  .presets-mock span{flex:1;text-align:center;font-size:11px;padding:8px 0;border:1px solid var(--line);border-radius:6px;background:#000}
+
+  /* Platforms */
+  .plats{display:flex;gap:16px;flex-wrap:wrap}
+  .plat{flex:1;min-width:240px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+  .plat h3{font-size:20px;margin-bottom:6px}
+  .plat p{color:var(--dim);font-size:14px}
+  .plat .nf{color:var(--red)} .plat .pv{color:#00a8e1}
+
+  /* Steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;position:relative}
+  .step .n{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;font-weight:800;
+    display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .step h3{font-size:17px;margin-bottom:6px}
+  .step p{color:var(--dim);font-size:14px}
+
+  /* Disclaimer + footer */
+  .disc{background:linear-gradient(180deg,#160709,#0d0d0d);border:1px solid #2a1416;border-radius:var(--r);padding:28px}
+  .disc h3{color:var(--gold);font-size:18px;margin-bottom:10px}
+  .disc p{color:var(--dim);font-size:14px;max-width:820px}
+  footer{border-top:1px solid var(--line);padding:44px 0;color:var(--mut)}
+  footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+  footer a{color:var(--dim);font-size:14px;margin-left:20px}
+  footer a:hover{color:#fff}
+  .credit b{color:var(--red)}
+
+  @media(max-width:900px){
+    .hero .wrap,.split,.split.rev .txt{grid-template-columns:1fr;order:0}
+    .grid{grid-template-columns:1fr 1fr}
+    .steps{grid-template-columns:1fr}
+    .nav-links a:not(.btn){display:none}
+  }
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="g">Sub</span><span class="r">tle</span><span class="y">way</span></a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#position">On-screen</a>
+      <a href="#language">Language</a>
+      <a href="#privacy">Privacy</a>
+      <a class="btn" href="#get">Get Subtleway</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <div class="pill">🎬 Works with <b>Netflix</b> &amp; <b>Prime Video</b></div>
+      <h1>Your subtitles,<br><span class="accent">your way.</span></h1>
+      <p class="sub">Subtleway is a free Chrome extension that gives you instant, intuitive control over the subtitles on Netflix and Prime Video — colour, font, size, outline, position and language — with every change appearing <em>live</em> on screen.</p>
+      <div class="cta">
+        <a class="btn" href="#get">＋ Add to Chrome</a>
+        <a class="btn ghost" href="https://github.com/serverl0rd/subtleway" target="_blank" rel="noopener">View on GitHub</a>
+        <span class="note">Free • No account • Nothing tracked</span>
+      </div>
+    </div>
+
+    <!-- Live-ish player demo -->
+    <div class="player" aria-hidden="true">
+      <div class="demo-badge" id="demoName">PRESET · NETFLIX</div>
+      <div class="demo-cap"><span id="demoCap">This is exactly how your subtitles will look.</span></div>
+      <div class="demo-float" title="Subtleway floating control">
+        <div class="glyph"><i style="background:#ffc600"></i><i style="background:#fff"></i><i style="background:#00963b"></i></div>
+      </div>
+      <div class="scrub"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="eyebrow">Everything you can do</div>
+    <h2>Total control over every caption</h2>
+    <p class="lead">Fine-tune the look, feel and placement of your subtitles — no menus to hunt through, no page reloads. Adjust anything and watch it change in real time.</p>
+
+    <div class="grid" style="margin-top:36px">
+      <div class="feat"><div class="ic">🎨</div><h3>Colour &amp; opacity</h3><p>Pick any subtitle colour and dial the opacity from a whisper to fully solid.</p></div>
+      <div class="feat"><div class="ic">🔤</div><h3>Seven fonts</h3><p>Netflix Sans, sans-serif, serif, monospace, rounded, condensed and casual — all system-safe.</p></div>
+      <div class="feat"><div class="ic">📏</div><h3>Size, 12–72px</h3><p>From subtle to big-screen readable, with a live slider.</p></div>
+      <div class="feat"><div class="ic">🅱️</div><h3>Type styling</h3><p>Bold, italic, UPPERCASE, letter spacing and line height for pixel-perfect legibility.</p></div>
+      <div class="feat"><div class="ic">🟦</div><h3>Background box</h3><p>Add a colour box behind the text with adjustable opacity and padding for maximum contrast.</p></div>
+      <div class="feat"><div class="ic">✏️</div><h3>Outline &amp; edge</h3><p>Drop shadow, outline, raised, depressed or neon glow — with your own edge colour.</p></div>
+      <div class="feat"><div class="ic">📍</div><h3>Precise position</h3><p>Vertical &amp; horizontal sliders, or drag the subtitles anywhere on screen.<span class="tag">DRAG-TO-PLACE</span></p></div>
+      <div class="feat"><div class="ic">🎛️</div><h3>On-screen controls</h3><p>A floating button appears with the player and fades away as you watch — tweak without leaving the video.<span class="tag">NEW</span></p></div>
+      <div class="feat"><div class="ic">🌐</div><h3>Switch language</h3><p>Change the subtitle track on Netflix using the languages your own subscription already offers.</p></div>
+      <div class="feat"><div class="ic">🎬</div><h3>One-tap presets</h3><p>Netflix, Cinema, High-contrast, Neon and Clean — instant looks in a single click.</p></div>
+      <div class="feat"><div class="ic">👁️</div><h3>Live preview</h3><p>See your exact styling in the popup before you even press play.</p></div>
+      <div class="feat"><div class="ic">🔒</div><h3>Private by design</h3><p>No analytics, no accounts, no network calls. Preferences stay on your device.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- POSITION / ON-SCREEN -->
+<section id="position" style="background:var(--bg2)">
+  <div class="wrap">
+    <div class="split">
+      <div class="txt">
+        <div class="eyebrow">Put them where you want</div>
+        <h2>Position it perfectly — right on screen</h2>
+        <p class="lead">Subtitles covering the action? Move them. Subtleway lets you nudge captions with sliders or simply <b>grab and drag them</b> to the exact spot — then hit <b>Save</b> to lock it in and clear the guide.</p>
+        <ul class="ticks">
+          <li><b>Drag-to-place:</b> a clear guide box appears over the captions; drop them anywhere.</li>
+          <li><b>Save / Done button</b> right on the guide — and <b>Esc</b> to exit — so you're never stuck.</li>
+          <li><b>Vertical &amp; horizontal</b> sliders for fine, repeatable placement.</li>
+          <li>Works in <b>fullscreen</b>, following the video wherever it goes.</li>
+        </ul>
+      </div>
+      <div class="player" style="aspect-ratio:16/10" aria-hidden="true">
+        <div class="demo-cap" style="bottom:auto;top:40%">
+          <span style="color:#fff;font-size:22px;text-shadow:2px 2px 4px #000">Drag me anywhere ⤢</span>
+        </div>
+        <div style="position:absolute;left:50%;top:38%;transform:translateX(-50%);
+          border:2px dashed var(--red);border-radius:8px;padding:6px 18px;color:#fff;font-size:12px;
+          background:rgba(229,9,20,.08)">
+          <span style="position:absolute;top:-32px;left:50%;transform:translateX(-50%);white-space:nowrap;
+            background:#141414;border:1px solid #333;padding:5px 8px;border-radius:8px;display:flex;gap:8px;align-items:center">
+            ⤢ Drag — then Save
+            <b style="background:var(--red);color:#fff;padding:4px 9px;border-radius:5px">✓ Save</b>
+          </span>
+          &nbsp;
+        </div>
+        <div class="scrub"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOATING CONTROL -->
+<section>
+  <div class="wrap">
+    <div class="split rev">
+      <div class="txt">
+        <div class="eyebrow">Like the player's own controls</div>
+        <h2>A floating control that knows when to appear</h2>
+        <p class="lead">Just like the play bar on Netflix and Prime, Subtleway's floating button <b>fades in when you move the mouse or pause</b>, and quietly <b>fades away</b> a few seconds after you resume. One click opens a compact on-screen panel.</p>
+        <div class="chips">
+          <span class="chip"><b>Presets</b> in a tap</span>
+          <span class="chip"><b>Colour</b> &amp; <b>size</b></span>
+          <span class="chip"><b>Position</b> mode</span>
+          <span class="chip"><b>Language</b> switch</span>
+          <span class="chip">Auto-hide</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center">
+        <div class="mock" style="width:300px">
+          <div class="mh"><span class="brand" style="font-size:22px"><span class="g">Sub</span><span class="r">tle</span><span class="y">way</span></span><span style="color:#777">×</span></div>
+          <div style="font-size:10px;letter-spacing:1px;color:#777;font-weight:700;margin-bottom:6px">PRESETS</div>
+          <div class="presets-mock"><span>Netflix</span><span>Cinema</span><span>Neon</span></div>
+          <div class="swrow" style="margin-top:8px"><span>Colour</span><span class="dot" style="background:#fff;border:1px solid #444"></span></div>
+          <div class="swrow"><span>Size</span><span class="bar"></span></div>
+          <div class="swrow"><span>Language</span><span style="color:#fff">English ▾</span></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <span style="flex:1;text-align:center;background:var(--red);color:#fff;font-weight:700;font-size:12px;padding:9px;border-radius:6px">⤢ Position on screen</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LANGUAGE -->
+<section id="language" style="background:var(--bg2)">
+  <div class="wrap">
+    <div class="eyebrow">Legitimately yours</div>
+    <h2>Switch subtitle language in a click</h2>
+    <p class="lead">On Netflix, Subtleway reads the subtitle tracks your account already provides — through the player's own API — and lets you switch between them instantly, without digging into the settings menu. On Prime Video, language is handled by the player's built-in subtitle menu.</p>
+    <ul class="ticks" style="max-width:720px">
+      <li>Uses <b>only the tracks your own subscription includes</b> — nothing is fetched or injected.</li>
+      <li>No downloading, hosting, or sharing of subtitle files. Ever.</li>
+      <li>Instant switching from the popup <b>or</b> the on-screen panel.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- PLATFORMS -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Supported everywhere you stream these</div>
+    <h2>Built for the big two</h2>
+    <div class="plats" style="margin-top:26px">
+      <div class="plat"><h3 class="nf">Netflix</h3><p>Full styling, positioning, on-screen controls, and one-click subtitle-language switching via the native player API.</p></div>
+      <div class="plat"><h3 class="pv">Prime Video</h3><p>Full styling, positioning and on-screen controls across primevideo.com and amazon.* regional domains. Language via the native menu.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW / GET -->
+<section id="get" style="background:var(--bg2)">
+  <div class="wrap">
+    <div class="eyebrow">Up and running in a minute</div>
+    <h2>Get Subtleway</h2>
+    <div class="steps" style="margin-top:26px">
+      <div class="step"><div class="n">1</div><h3>Install</h3><p>Add it from the Chrome Web Store, or load the unpacked extension from GitHub.</p></div>
+      <div class="step"><div class="n">2</div><h3>Open a title</h3><p>Start watching on Netflix or Prime Video and turn subtitles on in the player.</p></div>
+      <div class="step"><div class="n">3</div><h3>Make it yours</h3><p>Click the Subtleway icon — or the on-screen floating button — and tune away, live.</p></div>
+    </div>
+    <div class="cta" style="margin-top:30px">
+      <a class="btn" href="https://github.com/serverl0rd/subtleway" target="_blank" rel="noopener">＋ Add to Chrome</a>
+      <a class="btn ghost" href="https://github.com/serverl0rd/subtleway" target="_blank" rel="noopener">Get the code</a>
+    </div>
+  </div>
+</section>
+
+<!-- DISCLAIMER / PRIVACY -->
+<section id="privacy">
+  <div class="wrap">
+    <div class="disc">
+      <h3>⚖️ Legitimate subscriptions only</h3>
+      <p><b>Subtleway works with your own legitimate subscription only.</b> It restyles the subtitles a service already displays to you and switches between the subtitle tracks your account already includes. It does <b>not</b> enable, encourage, or support piracy, account sharing, or bypassing any paid service, and it does not download, host, or inject external subtitle content or defeat any content protection. Subtleway collects nothing and sends nothing anywhere — your preferences stay on your device.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="credit">A free product by <b>BuildCraft&nbsp;Labs</b> · Not affiliated with Netflix, Amazon/Prime Video, or Subway.</div>
+    <div>
+      <a href="https://github.com/serverl0rd/subtleway" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/serverl0rd/subtleway/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy</a>
+      <a href="https://github.com/serverl0rd/subtleway/blob/main/TRADEMARKS.md" target="_blank" rel="noopener">Trademarks</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Cycle the hero demo caption through the real presets to show the range.
+  var PRESETS = [
+    {name:'NETFLIX', text:'This is exactly how your subtitles will look.',
+     css:{color:'#fff',fontFamily:'"Netflix Sans",Arial,sans-serif',fontSize:'30px',fontWeight:'400',
+          textShadow:'2px 2px 4px rgba(0,0,0,.9)',background:'transparent',padding:'0'}},
+    {name:'CINEMA', text:'Every word, in warm cinema gold.',
+     css:{color:'#f5c518',fontFamily:'Georgia,serif',fontSize:'32px',fontWeight:'400',letterSpacing:'.3px',
+          textShadow:'-1.5px -1.5px 0 #000,1.5px -1.5px 0 #000,-1.5px 1.5px 0 #000,1.5px 1.5px 0 #000',background:'transparent',padding:'0'}},
+    {name:'HIGH CONTRAST', text:'Maximum readability, on a solid box.',
+     css:{color:'#fff',fontFamily:'Arial,sans-serif',fontSize:'30px',fontWeight:'700',
+          textShadow:'none',background:'rgba(0,0,0,.95)',padding:'4px 14px'}},
+    {name:'NEON', text:'Glowing, bold and unmistakable.',
+     css:{color:'#39ff14',fontFamily:'"Trebuchet MS",sans-serif',fontSize:'32px',fontWeight:'700',
+          textShadow:'0 0 6px #00b3ff,0 0 12px #00b3ff,0 0 20px #00b3ff',background:'transparent',padding:'0'}},
+    {name:'CLEAN', text:'Simple. Crisp. Out of the way.',
+     css:{color:'#fff',fontFamily:'Arial,sans-serif',fontSize:'28px',fontWeight:'400',
+          textShadow:'none',background:'transparent',padding:'0'}}
+  ];
+  var i=0, cap=document.getElementById('demoCap'), name=document.getElementById('demoName');
+  function applyPreset(p){
+    cap.textContent=p.text;
+    var s=cap.style;
+    s.color=p.css.color;s.fontFamily=p.css.fontFamily;s.fontSize=p.css.fontSize;
+    s.fontWeight=p.css.fontWeight;s.letterSpacing=p.css.letterSpacing||'0';
+    s.textShadow=p.css.textShadow;s.background=p.css.background;s.padding=p.css.padding;
+    s.borderRadius='4px';
+    name.textContent='PRESET · '+p.name;
+  }
+  applyPreset(PRESETS[0]);
+  setInterval(function(){ i=(i+1)%PRESETS.length; applyPreset(PRESETS[i]); }, 2600);
+</script>
+</body>
+</html>
